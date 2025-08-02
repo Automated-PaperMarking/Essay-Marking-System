@@ -33,12 +33,12 @@ uploaded_file = st.file_uploader("📷 Upload a handwritten image", type=["jpg",
 
 if uploaded_file:
     original_image = Image.open(uploaded_file).convert("RGB")
-    st.image(original_image, caption="📸 Original Image", use_column_width=True)
+    st.image(original_image, caption="📸 Original Image", use_container_width=True)
 
     # Preprocessing
     st.subheader("🧹 Preprocessing")
     preprocessed_image = preprocess_image(original_image)
-    st.image(preprocessed_image, caption="🧼 Preprocessed Image", use_column_width=True)
+    st.image(preprocessed_image, caption="🧼 Preprocessed Image", use_container_width=True)
 
     # Extract text with TrOCR
     with st.spinner("🔍 Extracting text..."):

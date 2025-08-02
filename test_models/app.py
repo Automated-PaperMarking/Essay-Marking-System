@@ -28,7 +28,7 @@ uploaded_file = st.file_uploader("Upload a handwritten image", type=["png", "jpg
 
 if uploaded_file:
     image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, caption="📸 Uploaded Image", use_column_width=True)
+    st.image(image, caption="📸 Uploaded Image", use_container_width=True)
 
     # Prompt for vision-language model
     prompt = "<|user|>\nWhat is the handwritten text in this image?\n<|image|>\n<image_placeholder>\n<|endofimage|>\n<|assistant|>"
