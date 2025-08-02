@@ -6,7 +6,7 @@ import difflib
 import os
 
 # Set your OpenAI API Key
-openai.api_key = "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"
+openai.api_key = "Your Key"
 
 st.title("📝 Handwritten Essay Grader using LLM")
 
