@@ -93,30 +93,84 @@ def image_to_markdown(image):
 def evaluate_answer(marking_md, student_md, reg_number):
     try:
         prompt = f"""
-        You are an academic evaluator. Below are two texts:
-        1. **Marking Scheme**: Contains the expected answers or key points for an essay question.
-        2. **Student Answer**: The student's response to the essay question.
+You are an academic evaluator. Below are two sections:
+1. **Marking Scheme** – contains expected answer points for an essay, each followed by the mark allocation (e.g., [4 Marks]).
+2. **Student Answer** – the student's response to the same question.
 
-        **Task**:
-        - Compare the student's answer with the marking scheme.
-        - Identify which key points from the marking scheme are present, partially present, or missing in the student's answer.
-        - Provide a concise evaluation, including:
-          - A score out of 100 based on completeness and accuracy.
-          - A brief explanation of the score, highlighting strengths and weaknesses.
+---
 
-        **Marking Scheme**:
-        {marking_md}
+### 🎯 TASK:
+Evaluate the student’s response against **each marking point**, using the mark allocation provided. For each point, identify whether it is:
 
-        **Student Answer**:
-        {student_md}
+- ✅ Fully covered – award **full marks**
+- ⚠️ Partially covered – award **half marks**
+- ❌ Not covered – award **zero marks**
 
-        Format the response in Markdown with a score and explanation.
-        """
+---
+
+### 📝 Evaluation Format (Strictly follow):
+
+**Point**: *<Copied from marking scheme>*
+- **Allocated**: [X Marks]
+- **Evaluation**: ✅ / ⚠️ / ❌
+- **Awarded**: X / (X/2) / 0
+- **Comment**: <Why it was awarded that way>
+
+Do this for every point mentioned in the marking scheme.
+
+---
+
+### 📊 Final Summary:
+
+- Total Allocated: XX Marks  
+- ✅ Full Marks Awarded: XX  
+- ⚠️ Half Marks Awarded: XX  
+- ❌ Zero Marks: XX  
+- **Total Awarded**: XX Marks
+
+---
+
+### 📚 Marking Scheme:
+{marking_md}
+
+---
+
+### ✍️ Student Answer:
+{student_md}
+"""
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
         st.error(f"Error evaluating answer: {e}")
         return None
+
+# def evaluate_answer(marking_md, student_md, reg_number):
+#     try:
+#         prompt = f"""
+#         You are an academic evaluator. Below are two texts:
+#         1. **Marking Scheme**: Contains the expected answers or key points for an essay question.
+#         2. **Student Answer**: The student's response to the essay question.
+
+#         **Task**:
+#         - Compare the student's answer with the marking scheme.
+#         - Identify which key points from the marking scheme are present, partially present, or missing in the student's answer.
+#         - Provide a concise evaluation, including:
+#           - A score out of 100 based on completeness and accuracy.
+#           - A brief explanation of the score, highlighting strengths and weaknesses.
+
+#         **Marking Scheme**:
+#         {marking_md}
+
+#         **Student Answer**:
+#         {student_md}
+
+#         Format the response in Markdown with a score and explanation.
+#         """
+#         response = model.generate_content(prompt)
+#         return response.text
+#     except Exception as e:
+#         st.error(f"Error evaluating answer: {e}")
+#         return None
 
 # ===== STREAMLIT INTERFACE =====
 st.set_page_config(page_title="Essay Paper Evaluation System", layout="wide")
@@ -192,9 +246,6 @@ if student_image:
                         st.markdown(extracted_md)
                     else:
                         st.error("Registration number not found in the extracted text. Make sure it starts with `Reg Number: $...`")
-
-
-
                 
 
 # Section 3: Evaluate Student Answer
