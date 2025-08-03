@@ -1,0 +1,179 @@
+**Q3.** a)
+
+The *mode* is identified as the value that occurs most frequently in a data set. For
+
+example, in the sequence 99, 86, 87, 88, 111, 86, 54, the mode is 86, occurring twice
+
+(highest number of times).
+
+Write a function with the prototype **int** Mode(**int** ar[], **int** N);, that returns the *mode*
+
+of data set given in the array ar[ ] of size N.
+
+[4 Marks]
+
+Answer
+
+**int** Mode( **int** ar [ ] ,
+
+**int** N)
+
+*{*
+
+**int** mode = ar [ 0 ] ;
+
+*// Assume the*
+
+*f i r s t*
+
+*element as*
+
+*the mode*
+
+*i n i t i a*
+
+**int** maxCount = 0;
+
+**for** ( **int**
+
+i = 0;
+
+i *<* N;
+
+i++)
+
+*{*
+
+**int** count = 1; *// Count the*
+
+*frequency*
+
+*of*
+
+*the*
+
+*current*
+
+*element*
+
+**for** ( **int**
+
+j = i + 1;
+
+j *<* N;
+
+j++)
+
+*{*
+
+**i f**
+
+( ar [ i ] == ar [ j ] )
+
+count++;
+
+*}*
+
+**i f**
+
+( count *>* maxCount)
+
+*{* *//*
+
+*I f*
+
+*the*
+
+*frequency*
+
+*i s*
+
+*greater*
+
+*than*
+
+*the*
+
+*previous maximum*
+
+maxCount = count ;
+
+mode = ar [ i ] ;
+
+*// Update mode to*
+
+*the*
+
+*current*
+
+*element*
+
+*}*
+
+*}*
+
+**return** mode ;
+
+*}*
+
+b)
+
+The Fibonacci series defined as
+
+*f**n* = *f**n**−*1 + *f**n**−*2
+
+where *n* = 1*,* 2*,* 3*,* 4*, . . .* with initial values *f*1 = 0, *f*2 = 0
+
+is the infinite sequence 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55,... .
+
+The 1*st*and 2*nd*numbers are 0 and 1, respectively. Starting from the 3*rd*number
+
+onward, each subsequent number in the series is the sum of two preceding numbers.
+
+E.g. 8*th*number in the series (13) is equal to the sum of 6*th*and 7*th*numbers (5+8)
+
+in the series.
+
+Write a function of prototype **unsigned long** nthFibonacci(**unsigned long** n); that
+
+returns the *n**th*number in the Fibonacci series.
+
+[4 Marks]
+
+Answer
+
+**unsigned long** nthFibonacci (**unsigned long** n)
+
+*{*
+
+**i f**
+
+(n *<*= 2) **return** n = 1; *// Base cases*
+
+*for*
+
+*f i r s t*
+
+*two Fb numbers*
+
+**unsigned long** a = 0 , b = 1 , temp ;
+
+**for** (**unsigned long** i = 3;
+
+i *<*= n ;
+
+i++)
+
+*{*
+
+temp = a + b ;
+
+a = b ;
+
+b = temp ;
+
+*}*
+
+**return** b ;
+
+*}*

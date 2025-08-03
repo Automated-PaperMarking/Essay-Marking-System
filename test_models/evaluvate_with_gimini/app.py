@@ -122,50 +122,78 @@ def evaluate_answer(marking_md, student_md, reg_number):
 st.set_page_config(page_title="Essay Paper Evaluation System", layout="wide")
 st.title("📝 Essay Paper Evaluation System")
 
-# Section 1: Upload Marking Scheme PDF
-st.header("Upload Marking Scheme")
-marking_pdf = st.file_uploader("Upload Marking Scheme PDF", type=["pdf"])
+marking_pdf = st.file_uploader("Upload Marking Scheme PDF", type="pdf")
+
+# Save PDF in session but delay processing
 if marking_pdf:
-    with open(MARKING_PDF, "wb") as f:
-        f.write(marking_pdf.read())
-    marking_md_content = convert_pdf_to_markdown_html(MARKING_PDF, MARKING_MD)
-    split_questions_to_folder(MARKING_MD, QUESTIONS_FOLDER)
-    st.session_state.marking_md_content = marking_md_content
-    st.subheader("Marking Scheme (Markdown)")
-    st.markdown(marking_md_content)
+    st.session_state.uploaded_marking_pdf = marking_pdf
+    st.success("✅ Marking PDF uploaded. Now click 'Save Model Answers' to process.")
+
+# Process on button click
+if st.button("💾 Save Model Answers"):
+    if 'uploaded_marking_pdf' in st.session_state:
+        with open(MARKING_PDF, "wb") as f:
+            f.write(st.session_state.uploaded_marking_pdf.read())
+
+        # Process to markdown and split
+        marking_md_content = convert_pdf_to_markdown_html(MARKING_PDF, MARKING_MD)
+        split_questions_to_folder(MARKING_MD, QUESTIONS_FOLDER)
+        st.session_state.marking_md_content = marking_md_content
+
+        st.success("✅ Model answers saved and split into individual question files.")
+    else:
+        st.warning("⚠️ Please upload a marking scheme PDF first.")
+
+
+
+# # Section 1: Upload Marking Scheme PDF
+# st.header("Upload Marking Scheme")
+# marking_pdf = st.file_uploader("Upload Marking Scheme PDF", type=["pdf"])
+# if marking_pdf:
+#     with open(MARKING_PDF, "wb") as f:
+#         f.write(marking_pdf.read())
+#     marking_md_content = convert_pdf_to_markdown_html(MARKING_PDF, MARKING_MD)
+#     split_questions_to_folder(MARKING_MD, QUESTIONS_FOLDER)
+#     st.session_state.marking_md_content = marking_md_content
+#     st.subheader("Marking Scheme (Markdown)")
+#     st.markdown(marking_md_content)
 
 # Section 2: Upload Student Answer Image
 st.header("Upload Student Answer")
 student_image = st.file_uploader("Upload Student Answer Image", type=["jpg", "jpeg", "png"])
 if student_image:
     image = Image.open(student_image).convert("RGB")
-    st.image(image, caption="Student Answer Image", use_column_width=True)
+    
+    # Create two columns
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.image(image, caption="🖼️ Student Answer Image", use_container_width=True)
+    
+    with col2:
+        if st.button("Extract Text from Image"):
+            with st.spinner("Extracting text..."):
+                extracted_md = image_to_markdown(image)
+                if extracted_md:
+                    match = re.search(r"Reg\s*Number:\s*\$([^\n\r]+)", extracted_md, re.IGNORECASE)
+                    if match:
+                        reg_number_raw = match.group(1)
+                        reg_number = reg_number_raw.replace(" ", "")
+                        safe_reg_number = reg_number.replace("/", "_").replace("\\", "_")
 
-    if st.button("Extract Text from Image"):
-        with st.spinner("Extracting text..."):
-            extracted_md = image_to_markdown(image)  # No reg_number passed
-            if extracted_md:
-                # Find line starting with 'Reg Number:' and containing '$'
-                match = re.search(r"Reg\s*Number:\s*\$([^\n\r]+)", extracted_md, re.IGNORECASE)
+                        if not os.path.exists(STUDENT_ANSWERS_FOLDER):
+                            os.makedirs(STUDENT_ANSWERS_FOLDER)
+                        md_path = os.path.join(STUDENT_ANSWERS_FOLDER, f"{safe_reg_number}.md")
+                        with open(md_path, "w", encoding="utf-8") as f:
+                            f.write(extracted_md)
 
-                if match:
-                    reg_number_raw = match.group(1)
-                    reg_number = reg_number_raw.replace(" ", "")  # EG / 2020 / 3905 → EG/2020/3905
-                    safe_reg_number = reg_number.replace("/", "_").replace("\\", "_")
+                        st.session_state.student_md_files[safe_reg_number] = extracted_md
+                        st.markdown(f"### 📄 Extracted Text (Reg: {reg_number})")
+                        st.markdown(extracted_md)
+                    else:
+                        st.error("Registration number not found in the extracted text. Make sure it starts with `Reg Number: $...`")
 
-                    # Save Markdown file under correct name
-                    if not os.path.exists(STUDENT_ANSWERS_FOLDER):
-                        os.makedirs(STUDENT_ANSWERS_FOLDER)
-                    md_path = os.path.join(STUDENT_ANSWERS_FOLDER, f"{safe_reg_number}.md")
-                    with open(md_path, "w", encoding="utf-8") as f:
-                        f.write(extracted_md)
 
-                    # Save to session state
-                    st.session_state.student_md_files[safe_reg_number] = extracted_md
-                    st.subheader(f"Extracted Student Answer (Reg: {reg_number})")
-                    st.markdown(extracted_md)
-                else:
-                    st.error("Registration number not found in the extracted text. Make sure it starts with `Reg Number: $...`")
 
                 
 
