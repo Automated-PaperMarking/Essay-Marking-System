@@ -72,7 +72,7 @@ def image_to_markdown(image):
         img_data = io.BytesIO()
         image.save(img_data, format="JPEG")
         img_data.seek(0)
-        prompt = "Extract all handwritten text from this image as accurately as possible and format it as Markdown."
+        prompt = "This answers from students. some words in answers can cut by students and ignore those cut words.Full paragraphs also can be cut by students then also ignore them.Only consider the not cut things by students.Those are handwritten text so that they can be messy unclear and many more corruptions.Extract them as much as perfect way. Extract all handwritten text from this image as accurately as possible and format it as Markdown."
         response = model.generate_content(
             [prompt, Image.open(img_data)],
             stream=True
@@ -93,7 +93,8 @@ def image_to_markdown(image):
 def evaluate_answer(marking_md, student_md, reg_number):
     try:
         prompt = f"""
-You are an academic evaluator. Below are two sections:
+You are an university lecture with 25 years experience and in academic and evaluating.You are evaluate the first year students answers for questions of programming fundamentals.Criticaly evaluate the answers of students acording to your role.
+Below are two sections:
 1. **Marking Scheme** – contains expected answer points for an essay, each followed by the mark allocation (e.g., [4 Marks]).
 2. **Student Answer** – the student's response to the same question.
 
