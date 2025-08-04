@@ -72,7 +72,9 @@ def image_to_markdown(image):
         img_data = io.BytesIO()
         image.save(img_data, format="JPEG")
         img_data.seek(0)
-        prompt = "This answers from students. some words in answers can cut by students and ignore those cut words.Full paragraphs also can be cut by students then also ignore them.Only consider the not cut things by students.Those are handwritten text so that they can be messy unclear and many more corruptions.Extract them as much as perfect way. Extract all handwritten text from this image as accurately as possible and format it as Markdown."
+        prompt = "This answers from students.Analyze the attached image and extract all handwritten text. Your primary objective is to accurately identify and transcribe only the content that is not marked for deletion. You must follow this strict rule: if any text, code, or paragraph has a visible line drawn through it, you are to completely and utterly ignore that content. Under no circumstances should any crossed-out material be included in your output. Transcribe the remaining, unmarked handwritten text as perfectly as possible, and present the final result using Markdown."
+                
+        #prompt = "This answers from students. some words in answers can cut by students and ignore those cut words.Full paragraphs also can be cut by students then also ignore them.Only consider the not cut things by students.Those are handwritten text so that they can be messy unclear and many more corruptions.Extract them as much as perfect way. Extract all handwritten text from this image as accurately as possible and format it as Markdown."
         response = model.generate_content(
             [prompt, Image.open(img_data)],
             stream=True
@@ -93,52 +95,59 @@ def image_to_markdown(image):
 def evaluate_answer(marking_md, student_md, reg_number):
     try:
         prompt = f"""
-You are an university lecture with 25 years experience and in academic and evaluating.You are evaluate the first year students answers for questions of programming fundamentals.Criticaly evaluate the answers of students acording to your role.
-Below are two sections:
-1. **Marking Scheme** – contains expected answer points for an essay, each followed by the mark allocation (e.g., [4 Marks]).
-2. **Student Answer** – the student's response to the same question.
+        You are a university lecturer with 25 years of experience evaluating first-year programming fundamentals exams.
 
----
+        Below are two sections:
+        1. **Marking Scheme** – contains key answer points and allocated marks (e.g., [4 Marks]).
+        2. **Student Answer** – the student's response to the same question.
 
-### 🎯 TASK:
-Evaluate the student’s response against **each marking point**, using the mark allocation provided. For each point, identify whether it is:
+        ---
 
-- ✅ Fully covered – award **full marks**
-- ⚠️ Partially covered – award **half marks**
-- ❌ Not covered – award **zero marks**
+        ### 🎯 TASK (Evaluate generously, like a real teacher):
 
----
+        Your job is to award marks **based on presence of relevant ideas or keywords**, even if:
+        - The grammar is poor,
+        - The syntax is incorrect,
+        - The code has logical flaws.
 
-### 📝 Evaluation Format (Strictly follow):
+        ✅ If a student *mentions the correct idea, logic, or keyword*, give marks.  
+        ❌ Only **ignore** answers that are **completely irrelevant or missing**.
 
-**Point**: *<Copied from marking scheme>*
-- **Allocated**: [X Marks]
-- **Evaluation**: ✅ / ⚠️ / ❌
-- **Awarded**: X / (X/2) / 0
-- **Comment**: <Why it was awarded that way>
+        ⚠️ *Do not be strict*. Ignore spelling, structure, and grammar. Students are first-years.
 
-Do this for every point mentioned in the marking scheme.
+        ---
 
----
+        ### 📝 Evaluation Format (Strictly follow this):
 
-### 📊 Final Summary:
+        **Point**: *<Copied from marking scheme>*
+        - **Allocated**: [X Marks]
+        - **Evaluation**: ✅ / ⚠️ / ❌
+        - **Awarded**: X / (X/2) / 0
+        - **Comment**: <Explain simply why marks were given or not>
 
-- Total Allocated: XX Marks  
-- ✅ Full Marks Awarded: XX  
-- ⚠️ Half Marks Awarded: XX  
-- ❌ Zero Marks: XX  
-- **Total Awarded**: XX Marks
+        Do this for every point listed in the marking scheme.
 
----
+        ---
 
-### 📚 Marking Scheme:
-{marking_md}
+        ### 📊 Final Summary:
 
----
+        - Total Allocated: XX Marks  
+        - ✅ Full Marks Awarded: XX  
+        - ⚠️ Half Marks Awarded: XX  
+        - ❌ Zero Marks: XX  
+        - **Total Awarded**: XX Marks
 
-### ✍️ Student Answer:
-{student_md}
-"""
+        ---
+
+        ### 📚 Marking Scheme:
+        {marking_md}
+
+        ---
+
+        ### ✍️ Student Answer:
+        {student_md}
+        """
+
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
